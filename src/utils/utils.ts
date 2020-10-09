@@ -10,7 +10,7 @@ export const formatMessage = (username: string, message: string) => {
     }
 }
 
-export const generateAuthToken = (userId: string, username: string,
+export const generateAuthToken = (userId: string,
     fullName: string, email: string) => {
-    return jwt.sign({ user: { username, fullName, email, userId } }, jwtPrivateKey);
+    return jwt.sign({ user: { fullName, email, userId } }, jwtPrivateKey);
 }

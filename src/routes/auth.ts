@@ -31,7 +31,7 @@ router.post('/sign-in', asyncHandler(async (req: Request, res: Response, next: N
   const userId = user._id.toString();
 
   // Generating JWT
-  const token = generateAuthToken(userId, user.username, user.fullName, email);
+  const token = generateAuthToken(userId, user.fullName, email);
 
 
   const options: CookieOptions = { httpOnly: true };
@@ -50,7 +50,6 @@ router.post('/sign-in', asyncHandler(async (req: Request, res: Response, next: N
     {
       success: true, data: {
         user: {
-          username: user.username,
           email: user.email,
           fullName: user.fullName,
           userId: user._id
@@ -61,9 +60,9 @@ router.post('/sign-in', asyncHandler(async (req: Request, res: Response, next: N
 }));
 
 router.post('/sign-up', asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  let { username, password, email, fullName } = req.body;
+  let { password, email, fullName } = req.body;
 
-  if (!username || !password || !email || !fullName) {
+  if (!password || !email || !fullName) {
     return next(new ErrorResponse('Please send client details', 400));
   }
 
@@ -74,13 +73,13 @@ router.post('/sign-up', asyncHandler(async (req: Request, res: Response, next: N
   password = await bcrypt.hash(password, salt);
 
   // Creating client in clients collection
-  const clientDetails: any = await usersModel.create({ username, email, password, fullName });
+  const clientDetails: any = await usersModel.create({ email, password, fullName });
 
   // Getting Client details
   const { _id: userId } = clientDetails;
 
   // Generating JWT
-  clientDetails.token = generateAuthToken(userId, username, fullName, email);
+  clientDetails.token = generateAuthToken(userId, fullName, email);
 
   const options: CookieOptions = { httpOnly: true };
   const secure = process.env.NODE_ENV !== 'development';
@@ -96,7 +95,7 @@ router.post('/sign-up', asyncHandler(async (req: Request, res: Response, next: N
   res.cookie('access_token', token, options);
 
   // Sending final response
-  res.status(201).send({ success: true, data: { user: { userId, email, username, fullName }, token } });
+  res.status(201).send({ success: true, data: { user: { userId, email, fullName }, token } });
 }));
 
 // @route   GET /auth/google/callback
@@ -112,8 +111,8 @@ router.get('/google/callback', passport.authenticate('google', { failureRedirect
     options.secure = secure;
   }
 
-  const { _id: userId, username, fullName, email } = req.user as any;
-  const token = generateAuthToken(userId, username, fullName, email);
+  const { _id: userId, fullName, email } = req.user as any;
+  const token = generateAuthToken(userId, fullName, email);
 
   // Setting cookie 
   res.cookie('access_token', token, options);
