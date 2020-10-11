@@ -12,19 +12,17 @@ export default function (passport: PassportStatic) {
         callbackURL: '/api/auth/google/callback',
       },
       async (accessToken, refreshToken, profile, done) => {
-        const { sub: googleId, name: fullName, given_name,
-          family_name, picture, email
+        const { sub: googleId, name: fullName,
+          picture, email
         } = profile._json;
 
-        const username = `${given_name}${family_name}`
-
         const newUser = {
-          googleId, fullName, username,
+          googleId, fullName,
           picture, email
         }
 
         try {
-          const existingUser = await UserModel.findOne({ googleId }).lean();
+          const existingUser = await UserModel.findOne({$or: [{ googleId }, {email}]}).lean();
 
           if (existingUser) {
             done(undefined, existingUser)
