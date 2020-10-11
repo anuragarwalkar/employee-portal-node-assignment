@@ -1,6 +1,5 @@
-import express, { Application, NextFunction } from 'express';
+import express, { Application } from 'express';
 import http from 'http';
-import jwt from 'jsonwebtoken';
 import auth from '../routes/auth';
 import errorLogger from '../middleware/logger';
 import mongoDBConnection from '../config/mongoDB';
@@ -12,6 +11,7 @@ import authMiddlware from '../middleware/auth';
 import path from 'path';
 import passport from 'passport';
 import passportOauth from '../config/passport';
+import employee from '../routes/employee';
 passportOauth(passport);
 
 // Environemt Config
@@ -70,6 +70,8 @@ app.use('/api/v1', authMiddlware as any);
 
 // Auth Routes
 app.use('/api/auth', auth);
+
+app.use('/api/v1/employee', employee)
 
 // Error logger
 app.use(errorLogger);
